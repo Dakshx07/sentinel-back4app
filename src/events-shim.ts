@@ -1,5 +1,4 @@
-// events-shim.ts - Browser polyfill for Node.js events module
-// This is used by Parse SDK which expects Node.js EventEmitter
+
 
 export class EventEmitter {
   private events: { [key: string]: Function[] } = {};

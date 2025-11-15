@@ -14,30 +14,58 @@ const parseToAppUser = (parseUser: Parse.User): User => ({
 
 // SIGNUP
 export const signup = async (email: string, username: string, password: string): Promise<User> => {
-  const user = new Parse.User();
-  user.set('username', username);
-  user.set('email', email);
-  user.set('password', password);
-
   try {
+    // Check if Parse is initialized
+    if (typeof Parse === 'undefined' || !Parse.User) {
+      throw new Error('Authentication service is not available. Please check your configuration.');
+    }
+
+    const user = new Parse.User();
+    user.set('username', username);
+    user.set('email', email);
+    user.set('password', password);
+
     const newUser = await user.signUp();
     const appUser = parseToAppUser(newUser);
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(appUser));
     return appUser;
   } catch (error: any) {
-    throw new Error(error.message || 'Signup failed');
+    // Provide more specific error messages
+    if (error.code === 202) {
+      throw new Error('Username already taken. Please choose another.');
+    } else if (error.code === 203) {
+      throw new Error('Email already registered. Please sign in instead.');
+    } else if (error.code === 125) {
+      throw new Error('Invalid email address format.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Signup failed. Please try again.');
+    }
   }
 };
 
 // LOGIN
 export const login = async (email: string, password: string): Promise<User> => {
   try {
+    // Check if Parse is initialized
+    if (typeof Parse === 'undefined' || !Parse.User) {
+      throw new Error('Authentication service is not available. Please check your configuration.');
+    }
+
     const user = await Parse.User.logIn(email, password);
     const appUser = parseToAppUser(user);
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(appUser));
     return appUser;
   } catch (error: any) {
-    throw new Error(error.message || 'Invalid email or password');
+    // Provide more specific error messages
+    if (error.code === 101) {
+      throw new Error('Invalid email or password. Please try again.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Login failed. Please check your credentials and try again.');
+    }
   }
 };
 

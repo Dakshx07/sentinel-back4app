@@ -22,18 +22,31 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // You can also log the error to an error reporting service
+    // Log the error for debugging
     console.error("Uncaught error:", error, errorInfo);
+    
+    // Reset error state after a delay to allow recovery
+    setTimeout(() => {
+      this.setState({ hasError: false });
+    }, 5000);
   }
 
   render() {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return this.props.fallback || (
-        <div className="h-full w-full flex items-center justify-center text-center p-4">
-            <div>
-                <h1 className="text-2xl font-bold text-red-500">Something went wrong.</h1>
-                <p className="mt-2 text-medium-dark-text dark:text-medium-text">An unexpected error occurred. Please try refreshing the page.</p>
+        <div className="min-h-screen flex items-center justify-center text-center p-4 bg-light-primary dark:bg-dark-primary">
+            <div className="max-w-md">
+                <h1 className="text-2xl font-bold text-red-500 mb-4">Something went wrong.</h1>
+                <p className="mt-2 text-medium-dark-text dark:text-medium-text mb-6">
+                  An unexpected error occurred. The page will automatically recover in a few seconds, or you can refresh the page.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="btn-primary px-6 py-2"
+                >
+                  Refresh Page
+                </button>
             </div>
         </div>
       );

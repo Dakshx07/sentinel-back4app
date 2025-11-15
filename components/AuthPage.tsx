@@ -27,19 +27,20 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onNavigate, initialM
       let user;
       if (isLogin) {
         if (!email || !password) throw new Error('Please enter your email and password.');
-        user = login(email, password);
+        user = await login(email, password);
         addToast(`Welcome back, ${user.username}!`, 'success');
       } else {
         if (!email || !username || !password) throw new Error('Please fill in all fields.');
         if (password.length < 6) throw new Error('Password must be at least 6 characters long.');
-        user = signup(email, username, password);
+        user = await signup(email, username, password);
         addToast(`Account created! Welcome, ${user.username}.`, 'success');
       }
       onAuthSuccess(user);
     } catch (err: any) {
-      addToast(err.message || 'An error occurred.', 'error');
+      console.error('Auth error:', err);
+      addToast(err.message || 'An error occurred. Please try again.', 'error');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
   
